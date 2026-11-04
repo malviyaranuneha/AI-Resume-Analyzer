@@ -1,0 +1,289 @@
+{
+  "name": "AI resume Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI Resume and Job Match Analyzer",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Resume Upload",
+              "fieldType": "file",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Job Description",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Role",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "662ecf34-9414-4809-a10a-4ae0357c541b",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nYou are an expert ATS resume reviewer, recruitment specialist, and professional career coach.\n\nAnalyze the candidate's resume against the provided job description and target role.\n\nRESUME:\n{{$json.text}}\n\nJOB DESCRIPTION:\n{{$node[\"On form submission\"].json[\"Job Description\"]}}\n\nTARGET ROLE:\n{{$node[\"On form submission\"].json[\"Target Role\"]}}\n\nGenerate a detailed, professional, personalized resume analysis report.\n\nREPORT FORMAT:\n\n# AI Resume Analysis Report\n\n## 1. ATS Match Score\nProvide an estimated ATS match score from 0 to 100%.\nExplain the score using evidence from the resume and job description. Clearly state that this is an estimated score, not an actual ATS system result.\n\n## 2. Matching Skills\nList the relevant skills and experience that match the job description.\nExplain why they are relevant.\n\n## 3. Missing Skills\nIdentify skills or requirements mentioned in the job description that are not clearly demonstrated in the resume.\nDo not assume the candidate lacks a skill simply because it is not mentioned.\n\n## 4. Resume Strengths\nHighlight the candidate's strongest qualifications, achievements, and relevant experience.\n\n## 5. Resume Improvement Suggestions\nProvide specific, actionable recommendations to improve the resume.\nSuggest relevant keywords only when supported by the candidate's actual experience.\nDo not invent achievements, certifications, or experience.\n\n## 6. Interview Preparation Tips\nProvide 5 relevant interview questions and practical preparation tips based on the target role.\n\nFORMATTING RULES:\n- Output clean Markdown only.\n- Use ## for section headings.\n- Use a blank line between every section.\n- Put each bullet point on its own line, starting with \"- \".\n- Do not use Markdown tables or pipe characters as table separators.\n- Do not use HTML tags.\n- Use real line breaks, not literal backslash-n characters.\n- Do not wrap the report in a code block.\n- Keep paragraphs short and readable.\n- Use bold text only for important labels and scores.\n- Do not include unnecessary introductions or closing statements.\n\nEnsure the final report is clear, professional, accurate, and easy to read in an email.\n  ",
+        "batching": {}
+      },
+      "id": "91eae32c-dd62-45e0-bfb9-e239f07f8e4b",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "id": "d205adf9-c136-42f2-89ce-ee6b0c7f7549",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        448,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json[\"Email Address\"] }}",
+        "subject": "=Your Resume Analysis for {{ $('On form submission').item.json[\"Target Role\"] }}",
+        "message": "={{ $('Markdown').item.json.data }}",
+        "options": {}
+      },
+      "id": "5d2e46af-19b0-4533-b431-df2757835dfa",
+      "name": "Send Analysis Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date ": "={{$node[\"On form submission\"].json.submittedAt}}",
+            "Email": "={{$node[\"On form submission\"].json[\"Email Address\"]}}",
+            "Target Role": "={{$node[\"On form submission\"].json[\"Target Role\"]}}",
+            "Resume": "={{$node[\"On form submission\"].json.Resume}}",
+            "Job Description ": "={{$node[\"On form submission\"].json[\"Job Description\"]}}",
+            "AI report": "={{$node[\"Basic LLM Chain\"].json.text}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date ",
+              "displayName": "Date ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Target Role",
+              "displayName": "Target Role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume",
+              "displayName": "Resume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Description ",
+              "displayName": "Job Description ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI report",
+              "displayName": "AI report",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1072,
+        0
+      ],
+      "id": "589d7f87-05d8-47f7-8847-bcc02031b18d",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Resume_Upload",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "3d161027-db6d-4996-bca0-a8b6cd26f21d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $('Basic LLM Chain').item.json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        736,
+        0
+      ],
+      "id": "f74ec201-9195-4b18-90f8-393e896a83b7",
+      "name": "Markdown"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Analysis Email": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Send Analysis Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
