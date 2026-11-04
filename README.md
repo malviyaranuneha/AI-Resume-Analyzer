@@ -41,6 +41,9 @@ The project demonstrates workflow automation, generative AI integration, documen
 5. n8n converts the Markdown report to HTML.
 6. Gmail sends the formatted report to the submitted email address.
 7. Google Sheets records the submission information and AI-generated analysis.
+ ## Workflow Architecture
+
+![AI Resume Analyzer n8n Workflow](Workflow.png.png)
 
 ## Report Sections
 
