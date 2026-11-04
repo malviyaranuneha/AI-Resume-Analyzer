@@ -56,6 +56,17 @@ The project demonstrates workflow automation, generative AI integration, documen
 
 **Note:** The ATS match score is an AI-generated estimate and is not produced by a commercial applicant tracking system.
 
+## Sample AI Analysis Report
+
+### 1. ATS Match Score
+![Estimated ATS Match Score](Sample_Report.png)
+
+### 2. Matching and Missing Skills
+![Matching and Missing Skills](Sample%20Report.png)
+
+### 3. Resume Improvement Suggestions and Interview Tips
+![Resume Improvement Suggestions and Interview Tips](Sample-Report.png)
+
 ## Workflow File
 
 [View the sanitized n8n workflow](./AI_Resume_Analyzer_GitHub_Sanitized.json)
